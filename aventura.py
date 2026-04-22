@@ -1,77 +1,65 @@
 import streamlit as st
 
-st.set_page_config(page_title="Minha Aventura Visual", page_icon="🌈")
+st.set_page_config(page_title="Minha Aventura Kids", page_icon="🌈", layout="centered")
 
-# --- PASSO NOVO: Criar o Personagem ---
+# --- 1. Tela de Início (Escolha do Personagem) ---
 if 'nome_jogador' not in st.session_state:
-    st.markdown("<h1 style='text-align: center;'>Oi! Vamos Jogar?</h1>", unsafe_allow_html=True)
-    st.write("### Primeiro, como você se chama?")
-    nome = st.text_input("Digite seu nome aqui:")
+    st.markdown("<h1 style='text-align: center;'>🌟 Hora da Aventura!</h1>", unsafe_allow_html=True)
+    nome = st.text_input("Qual o seu nome?")
+    avatar = st.radio("Escolha quem você quer ser:", ["🤠 Explorador", "👩‍🌾 Exploradora", "🚀 Astronauta", "✨ Fada"])
     
-    st.write("### Escolha seu personagem:")
-    avatar = st.radio("Quem você quer ser?", ["Explorador 🤠", "Exploradora 👩‍🌾", "Astronauta 🚀", "Fada ✨"])
-    
-    if st.button("Começar Aventura! 🚀"):
+    if st.button("ENTRAR NO MUNDO! 🚀"):
         if nome:
             st.session_state.nome_jogador = nome
             st.session_state.avatar = avatar
-            st.session_state.x = 1
-            st.session_state.y = 1
+            st.session_state.x, st.session_state.y = 1, 1
             st.session_state.mochila = []
             st.rerun()
         else:
-            st.warning("Por favor, digite seu nome para começar!")
-    st.stop() # Para o código aqui até a criança clicar no botão
+            st.warning("Escreva seu nome primeiro! 😊")
+    st.stop()
 
-# --- DAQUI PARA BAIXO É O JOGO (Só aparece após escolher o nome) ---
-
-st.markdown(f"<h1 style='text-align: center; color: #FF4B4B;'>🌈 Vila de {st.session_state.nome_jogador}</h1>", unsafe_allow_html=True)
-
-# Imagens dos lugares (as mesmas de antes)
+# --- 2. Dados do Mundo ---
 lugares = {
-    (1, 1): {"nome": "Praça Central", "emoji": "⛲", "item": "Moeda de Ouro 🪙", "img": "https://freepik.com"},
-    (1, 0): {"nome": "Floresta Encantada", "emoji": "🌲", "item": "Graveto Mágico ✨", "img": "https://freepik.com"},
-    (1, 2): {"nome": "Parquinho Kids", "emoji": "🎡", "item": "Bola Colorida ⚽", "img": "https://freepik.com"},
-    (0, 1): {"nome": "Sua Casinha", "emoji": "🏠", "item": "Lanche 🍎", "img": "https://freepik.com"},
-    (2, 1): {"nome": "Loja de Brinquedos", "emoji": "🛍️", "item": "Brinquedo 🧸", "img": "https://freepik.com"},
+    (1, 1): {"n": "Praça Central", "item": "Moeda 🪙", "img": "https://freepik.com"},
+    (1, 0): {"n": "Floresta Encantada", "item": "Graveto ✨", "img": "https://freepik.com"},
+    (1, 2): {"n": "Parquinho", "item": "Bola ⚽", "img": "https://freepik.com"},
+    (0, 1): {"n": "Sua Casinha", "item": "Lanche 🍎", "img": "https://freepik.com"},
+    (2, 1): {"n": "Loja de Brinquedos", "item": "Ursinho 🧸", "img": "https://freepik.com"},
 }
 
-local_atual = lugares.get((st.session_state.x, st.session_state.y), {"nome": "Estrada", "emoji": "🛤️", "item": None, "img": "https://freepik.com"})
+local = lugares.get((st.session_state.x, st.session_state.y), {"n": "Estrada", "item": None, "img": "https://freepik.com"})
 
-st.image(local_atual['img'], use_container_width=True)
-st.subheader(f"{local_atual['emoji']} {local_atual['nome']}")
+# --- 3. Visual do Personagem "Caminhando" ---
+st.markdown(f"### 📍 {st.session_state.nome_jogador} está em: {local['n']}")
 
-# Botão de pegar item
-item_daqui = local_atual.get("item")
-if item_daqui and item_daqui not in st.session_state.mochila:
-    if st.button(f"🎁 Pegar {item_daqui}", use_container_width=True):
-        st.session_state.mochila.append(item_daqui)
+# Mostra a imagem do lugar
+st.image(local['img'], use_container_width=True)
+
+# Faz o bonequinho aparecer "em cima" de um palco
+st.markdown(f"<div style='text-align: center; font-size: 80px; margin-top: -60px;'>{st.session_state.avatar.split()[-1]}</div>", unsafe_allow_html=True)
+
+# --- 4. Interação e Movimento ---
+if local['item'] and local['item'] not in st.session_state.mochila:
+    if st.button(f"🎁 Pegar {local['item']}", use_container_width=True):
+        st.session_state.mochila.append(local['item'])
         st.balloons()
         st.rerun()
 
-st.divider()
+st.write("---")
+c1, c2, c3 = st.columns([1,1,1])
+with c2:
+    if st.button("⬆️ Subir"): st.session_state.y -= 1; st.rerun()
+c1, c2, c3 = st.columns([1,1,1])
+with c1:
+    if st.button("⬅️ Esquerda"): st.session_state.x -= 1; st.rerun()
+with c3:
+    if st.button("Direita ➡️"): st.session_state.x += 1; st.rerun()
+with c2:
+    if st.button("⬇️ Descer"): st.session_state.y += 1; st.rerun()
 
-# Controles
-c1, c2, c3 = st.columns(3)
-with c2: 
-    if st.button("⬆️", key="up"): st.session_state.y -= 1; st.rerun()
-c1, c2, c3 = st.columns(3)
-with c1: 
-    if st.button("⬅️", key="left"): st.session_state.x -= 1; st.rerun()
-with c3: 
-    if st.button("➡️", key="right"): st.session_state.x += 1; st.rerun()
-with c2: 
-    if st.button("⬇️", key="down"): st.session_state.y += 1; st.rerun()
-
-# Barra lateral personalizada
+# Mochila lateral
 with st.sidebar:
-    st.header(f"{st.session_state.avatar}")
-    st.write(f"**Jogador:** {st.session_state.nome_jogador}")
-    st.divider()
-    st.write("### 🎒 Mochila")
-    for objeto in st.session_state.mochila:
-        st.write(f"✅ {objeto}")
-    
-    if st.button("Sair do Jogo ❌"):
-        st.session_state.clear()
-        st.rerun()
+    st.header(f"🎒 Mochila de {st.session_state.nome_jogador}")
+    for i in st.session_state.mochila: st.write(f"✅ {i}")
+    if st.button("Recomeçar Jogo"): st.session_state.clear(); st.rerun()
